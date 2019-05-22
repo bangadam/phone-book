@@ -5,7 +5,21 @@
  */
 package phonebook.application;
 
+import java.awt.HeadlessException;
 import java.awt.event.ItemEvent;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 
 /**
  *
@@ -18,20 +32,16 @@ public class MainForm extends javax.swing.JFrame {
     Integer jumlahBarisPerhalaman = 5;
     Integer totalHalaman = 1;
     Integer totalData = 0;
+    String pathfile;
     /**
      * Creates new form MainForm
      */
     public MainForm() {
         initComponents();
         setLocationRelativeTo(null);
-
-        jComboBoxJumlahBaris.addItem("5");
-        jComboBoxJumlahBaris.addItem("15");
-        jComboBoxJumlahBaris.addItem("30");
-        jComboBoxJumlahBaris.addItemListener((ItemEvent e) -> {
-            initPagination();
-        });
-
+        buttonEnabledDisabled("awal");
+        idTextField.setVisible(false);
+        importButton.setEnabled(false);
         initPagination();
     }
 
@@ -57,19 +67,30 @@ public class MainForm extends javax.swing.JFrame {
         jLabel7 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         jSeparator4 = new javax.swing.JSeparator();
-        jScrollPane2 = new javax.swing.JScrollPane();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTableDokter = new javax.swing.JTable();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
+        simpanButton = new javax.swing.JButton();
+        editButton = new javax.swing.JButton();
+        hapusButton = new javax.swing.JButton();
         jButtonFirst = new javax.swing.JButton();
         jButtonPrevious = new javax.swing.JButton();
-        jComboBoxJumlahBaris = new javax.swing.JComboBox<>();
         jButtonNext = new javax.swing.JButton();
         jButtonLast = new javax.swing.JButton();
         jLabelTotalData = new javax.swing.JLabel();
         jLabelStatusHalaman = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
+        namaTextField = new javax.swing.JTextField();
+        no_1TextField = new javax.swing.JTextField();
+        jLabel9 = new javax.swing.JLabel();
+        no_2TextField = new javax.swing.JTextField();
+        jLabel10 = new javax.swing.JLabel();
+        jLabel11 = new javax.swing.JLabel();
+        alamattextField = new javax.swing.JTextField();
+        idTextField = new javax.swing.JTextField();
+        importButton = new javax.swing.JButton();
+        jSeparator5 = new javax.swing.JSeparator();
+        jLabel12 = new javax.swing.JLabel();
+        pilihFileButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -151,29 +172,50 @@ public class MainForm extends javax.swing.JFrame {
 
         jTableDokter.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {},
-                {},
-                {},
-                {}
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null}
             },
             new String [] {
-
+                "Id", "Nama", "Alamat", "No. Hp 1", "No. Hp 2"
             }
-        ));
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
+        jTableDokter.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTableDokterMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(jTableDokter);
 
-        jScrollPane2.setViewportView(jScrollPane1);
-
-        jButton1.setText("Tambah");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        simpanButton.setText("Simpan");
+        simpanButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                simpanButtonActionPerformed(evt);
             }
         });
 
-        jButton2.setText("Edit");
+        editButton.setText("Update");
+        editButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                editButtonActionPerformed(evt);
+            }
+        });
 
-        jButton3.setText("Hapus");
+        hapusButton.setText("Hapus");
+        hapusButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                hapusButtonActionPerformed(evt);
+            }
+        });
 
         jButtonFirst.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/first-track-multimedia-button.png"))); // NOI18N
         jButtonFirst.addActionListener(new java.awt.event.ActionListener() {
@@ -207,6 +249,34 @@ public class MainForm extends javax.swing.JFrame {
 
         jLabelStatusHalaman.setText("jLabel9");
 
+        jLabel8.setText("Nama");
+
+        jLabel9.setText("No. Telpon 1");
+
+        jLabel10.setText("No. Telpon 2");
+
+        jLabel11.setText("Alamat");
+
+        idTextField.setText("jTextField1");
+
+        importButton.setText("Import from CSV");
+        importButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                importButtonActionPerformed(evt);
+            }
+        });
+
+        jSeparator5.setOrientation(javax.swing.SwingConstants.VERTICAL);
+
+        jLabel12.setText("Import Kontak Dokter dari File ?");
+
+        pilihFileButton.setText("Pilih FIle");
+        pilihFileButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                pilihFileButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -217,80 +287,148 @@ public class MainForm extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jSeparator4)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel5)
-                        .addGap(283, 631, Short.MAX_VALUE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabel5)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(idTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(29, 29, 29)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                                        .addComponent(simpanButton)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(editButton)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(hapusButton))
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                                                .addComponent(jLabel8)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addComponent(namaTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 227, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                                .addComponent(jLabel9)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(no_1TextField, javax.swing.GroupLayout.PREFERRED_SIZE, 227, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(jLabel10)
+                                            .addComponent(jLabel11))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(no_2TextField, javax.swing.GroupLayout.PREFERRED_SIZE, 227, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(alamattextField, javax.swing.GroupLayout.PREFERRED_SIZE, 227, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                .addGap(18, 18, 18)
+                                .addComponent(jSeparator5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jLabel12))
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addGap(74, 74, 74)
+                                        .addComponent(pilihFileButton))
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addGap(49, 49, 49)
+                                        .addComponent(importButton))))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(jLabelStatusHalaman)
-                                .addGap(231, 231, 231)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(jButtonFirst)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jButtonPrevious)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jComboBoxJumlahBaris, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGap(18, 18, 18)
                                 .addComponent(jButtonNext)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jButtonLast)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGap(314, 314, 314)
                                 .addComponent(jLabelTotalData))
-                            .addComponent(jScrollPane2)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jButton1)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jButton2)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jButton3)
-                                .addGap(0, 0, Short.MAX_VALUE)))
-                        .addContainerGap())))
+                            .addComponent(jScrollPane1))
+                        .addContainerGap(21, Short.MAX_VALUE))))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel5)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel8)
+                            .addComponent(namaTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel11)
+                            .addComponent(alamattextField, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel9)
+                            .addComponent(no_1TextField, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel10)
+                            .addComponent(no_2TextField, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(4, 4, 4)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(idTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(simpanButton)
+                                .addComponent(editButton)
+                                .addComponent(hapusButton))))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jSeparator5))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGap(23, 23, 23)
+                                .addComponent(jLabel12)
+                                .addGap(18, 18, 18)
+                                .addComponent(pilihFileButton)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(importButton)
+                                .addGap(0, 12, Short.MAX_VALUE)))
+                        .addGap(6, 6, 6)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(7, 7, 7)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
-                    .addComponent(jButton2)
-                    .addComponent(jButton3))
-                .addGap(18, 18, 18)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 261, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 267, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabelTotalData)
-                        .addComponent(jLabelStatusHalaman))
+                    .addComponent(jLabelStatusHalaman)
+                    .addComponent(jLabelTotalData)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jButtonFirst)
                         .addComponent(jButtonPrevious)
-                        .addComponent(jComboBoxJumlahBaris, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jButtonNext)
                         .addComponent(jButtonLast)))
-                .addContainerGap(112, Short.MAX_VALUE))
+                .addGap(20, 20, 20))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        
-    }//GEN-LAST:event_jButton1ActionPerformed
+    private void simpanButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_simpanButtonActionPerformed
+        try {
+            String sql = "insert into dokter (nama, alamat, no_hp_1, no_hp_2) values('"+namaTextField.getText()+"','"+alamattextField.getText()+"','"+no_1TextField.getText()+"','"+no_2TextField.getText()+"')";
+            java.sql.Connection conn = (java.sql.Connection)Koneksi.koneksiDB();
+            java.sql.PreparedStatement pst = conn.prepareStatement(sql);
+            pst.execute();
+            JOptionPane.showMessageDialog(null, "berhasil disimpan");
+            MainForm form = new MainForm();
+            buttonEnabledDisabled("awal");
+            initPagination();
+        } catch (SQLException | HeadlessException e) {
+            JOptionPane.showMessageDialog(null, e);
+        }
+    }//GEN-LAST:event_simpanButtonActionPerformed
 
     private void jButtonFirstActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonFirstActionPerformed
         nomorHalaman = 1;
@@ -316,9 +454,102 @@ public class MainForm extends javax.swing.JFrame {
         initPagination();
     }//GEN-LAST:event_jButtonLastActionPerformed
 
-    private void initPagination() {
+    private void jTableDokterMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTableDokterMouseClicked
+        buttonEnabledDisabled("click_table");
+        int row = jTableDokter.getSelectedRow();
+        String id = jTableDokter.getModel().getValueAt(row, 0).toString();
+        String nama = jTableDokter.getValueAt(row, 0).toString();
+        String alamat = jTableDokter.getValueAt(row, 1).toString();
+        String no_hp_1 = jTableDokter.getValueAt(row, 2).toString();
+        String no_hp_2 = jTableDokter.getValueAt(row, 3).toString();
+        
+        idTextField.setText(id);
+        namaTextField.setText(nama);
+        alamattextField.setText(alamat);
+        no_1TextField.setText(no_hp_1);
+        no_2TextField.setText(no_hp_2);
+    }//GEN-LAST:event_jTableDokterMouseClicked
+
+    private void editButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editButtonActionPerformed
+        String id = idTextField.getText();
+        String nama = namaTextField.getText();
+        String alamat = alamattextField.getText();
+        String no_hp_1 = no_1TextField.getText();
+        String no_hp_2 = no_2TextField.getText();
+        try {
+            String sql = "UPDATE dokter SET "
+                    + "nama= '"+nama+"',"
+                    + "alamat= '"+alamat+"',"
+                    + "no_hp_1= '"+no_hp_1+"',"
+                    + "no_hp_2= '"+no_hp_2+"'"
+                    + " WHERE id='"+id+"'";
+            Connection conn = (Connection) Koneksi.koneksiDB();
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.execute();
+            JOptionPane.showMessageDialog(null, "Data Berhasil di Update");
+            initPagination();
+            buttonEnabledDisabled("edit");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e);
+        }
+    }//GEN-LAST:event_editButtonActionPerformed
+
+    private void hapusButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hapusButtonActionPerformed
+       String id = idTextField.getText();
+       int dialogButton = JOptionPane.YES_NO_OPTION;
+       int dialogResult = JOptionPane.showConfirmDialog (null, "Apakah anda ingin menghapus data ini ?","Warning",dialogButton);
+       if(dialogResult == JOptionPane.YES_OPTION){
+           try {
+               String sql = "DELETE FROM dokter WHERE id='"+id+"'";
+               Connection conn = (Connection) Koneksi.koneksiDB();
+               PreparedStatement stmt = conn.prepareStatement(sql);
+               stmt.execute();
+               JOptionPane.showMessageDialog(null, "Data Berhasil di hapus");
+               buttonEnabledDisabled("edit");
+               initPagination();
+           } catch (Exception e) {
+              JOptionPane.showMessageDialog(null, e);
+           }
+       }
+    }//GEN-LAST:event_hapusButtonActionPerformed
+
+    private void importButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importButtonActionPerformed
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(pathfile));
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] value = line.split(",");
+                String sql = "INSERT INTO dokter (nama,alamat,no_hp_1,no_hp_2) VALUES(?,?,?,?)";
+                Connection conn = (Connection) Koneksi.koneksiDB();
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                stmt.setString(1, value[0]);
+                stmt.setString(2, value[1]);
+                stmt.setString(3, value[2]);
+                stmt.setString(4, value[3]);
+                stmt.executeUpdate();
+                stmt.close();
+            }
+            br.close();
+            JOptionPane.showMessageDialog(null, "Import data berhasil !");
+            initPagination();
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, e);
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, ex);
+        }
+    }//GEN-LAST:event_importButtonActionPerformed
+
+    private void pilihFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pilihFileButtonActionPerformed
+        JFileChooser chooseFile = new JFileChooser();
+        chooseFile.showOpenDialog(null);
+        File file = chooseFile.getSelectedFile();
+        pathfile = file.getAbsolutePath();
+        importButton.setEnabled(true);
+    }//GEN-LAST:event_pilihFileButtonActionPerformed
+
+    public void initPagination() {
         totalData = App.getDokterService().count();
-        jumlahBarisPerhalaman = Integer.valueOf(jComboBoxJumlahBaris.getSelectedItem().toString());
+        jumlahBarisPerhalaman = 20;
         Double totalHalamanD = Math.ceil(totalData.doubleValue() / jumlahBarisPerhalaman.doubleValue());
         totalHalaman = totalHalamanD.intValue();
 
@@ -345,9 +576,34 @@ public class MainForm extends javax.swing.JFrame {
         dokterTableModel = new DokterTableModel();
         dokterTableModel.setList(App.getDokterService().getAll(nomorHalaman, jumlahBarisPerhalaman));
         jTableDokter.setModel(dokterTableModel);
-
+        
+        jTableDokter.removeColumn(jTableDokter.getColumnModel().getColumn(0));
+        
         jLabelStatusHalaman.setText("Halaman " + nomorHalaman + " dari " + totalHalaman);
         jLabelTotalData.setText(("Total data " + totalData));
+    }
+    
+    public void buttonEnabledDisabled(String choice) {
+        switch(choice) {
+            case "awal":
+                editButton.setEnabled(false);
+                hapusButton.setEnabled(false);
+                break;
+             case "edit":
+                namaTextField.setText("");
+                alamattextField.setText("");
+                no_1TextField.setText("");
+                no_2TextField.setText("");
+                editButton.setEnabled(false);
+                simpanButton.setEnabled(true);
+                hapusButton.setEnabled(false);
+                break;
+            case "click_table":
+                simpanButton.setEnabled(false);
+                editButton.setEnabled(true);
+                hapusButton.setEnabled(true);
+                break;
+        }
     }
     /**
      * @param args the command line arguments
@@ -385,31 +641,42 @@ public class MainForm extends javax.swing.JFrame {
 //    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
+    private javax.swing.JTextField alamattextField;
+    private javax.swing.JButton editButton;
+    private javax.swing.JButton hapusButton;
+    private javax.swing.JTextField idTextField;
+    private javax.swing.JButton importButton;
     private javax.swing.JButton jButtonFirst;
     private javax.swing.JButton jButtonLast;
     private javax.swing.JButton jButtonNext;
     private javax.swing.JButton jButtonPrevious;
-    private javax.swing.JComboBox<String> jComboBoxJumlahBaris;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JLabel jLabelStatusHalaman;
     private javax.swing.JLabel jLabelTotalData;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
     private javax.swing.JSeparator jSeparator4;
+    private javax.swing.JSeparator jSeparator5;
     private javax.swing.JTable jTableDokter;
+    private javax.swing.JTextField namaTextField;
+    private javax.swing.JTextField no_1TextField;
+    private javax.swing.JTextField no_2TextField;
+    private javax.swing.JButton pilihFileButton;
+    private javax.swing.JButton simpanButton;
     // End of variables declaration//GEN-END:variables
 }

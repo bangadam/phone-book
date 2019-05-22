@@ -2,6 +2,7 @@ package phonebook.application;
 
 
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
+import java.sql.SQLException;
 //import com.jtattoo.plaf.mint.MintLookAndFeel;
 /**
  *
@@ -14,18 +15,17 @@ public class App {
         return dokterService;
     }
     
-    public static void main( String[] args ){
+    public static void main( String[] args ) throws SQLException{
         MysqlDataSource dataSource=new MysqlDataSource();
         dataSource.setUser("root");
         dataSource.setPassword("root");
         dataSource.setDatabaseName("contact_app");
         dataSource.setServerName("localhost");
         
-        dokterService=new DokterServices();
+        dokterService =new DokterServices();
         dokterService.setDataSource(dataSource);
         
         try{
-//            UIManager.setLookAndFeel(new MintLookAndFeel());
             new MainForm().setVisible(true);
         }catch(Exception ex){
             ex.printStackTrace();

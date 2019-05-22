@@ -15,31 +15,12 @@ import javax.swing.table.AbstractTableModel;
 public class DokterTableModel extends AbstractTableModel{
     
     List<Dokter> listDokter=new ArrayList<Dokter>();
-    private final String HEADER[]={"Nama","Alamat","No. Telepon 1","No. Telepon 2"};
+    private final String HEADER[]={"Id","Nama","Alamat","No. Telepon 1","No. Telepon 2"};
     
     public void setList(List<Dokter> listDokter){
         this.listDokter=listDokter;
     }
     
-    public void save(Dokter Dokter){
-        listDokter.add(Dokter);
-        fireTableRowsInserted(getRowCount()-1, getRowCount()-1);
-    }
-    
-    public void edit(int index,Dokter Dokter){
-        listDokter.set(index, Dokter);
-        fireTableRowsUpdated(index, index);
-    }
-    
-    public void delete(int index){
-        listDokter.remove(index);
-        fireTableRowsDeleted(index, index);
-    }
-    
-    public Dokter findOne(int index){
-        return listDokter.get(index);
-    }
- 
     public int getRowCount() {
         return listDokter.size();
     }
@@ -57,15 +38,18 @@ public class DokterTableModel extends AbstractTableModel{
         
         switch(columnIndex){
             case 0:
-            return Dokter.getNama();
+            return Dokter.getId();
             
             case 1:
+            return Dokter.getNama();
+            
+            case 2:
             return Dokter.getAlamat();
                 
-            case 2:
+            case 3:
             return Dokter.getNo_hp_1();
                 
-            case 3:
+            case 4:
             return Dokter.getNo_hp_2();
                 
             default:
