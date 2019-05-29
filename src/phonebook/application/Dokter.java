@@ -14,7 +14,7 @@ public class Dokter {
     private String nama;
     private String no_hp_1;
     private String no_hp_2;
-    private String alamat;
+    private String email;
 
     public long getId() {
         return id;
@@ -45,15 +45,15 @@ public class Dokter {
     }
 
     public void setNo_hp_2(String no_hp_2) {
-        this.no_hp_2 = no_hp_2;
+        this.no_hp_2 = (no_hp_2 == null ? " " : no_hp_2);
     }
 
-    public String getAlamat() {
-        return alamat;
+    public String getEmail() {
+        return email;
     }
 
-    public void setAlamat(String alamat) {
-        this.alamat = alamat;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     

@@ -1,31 +1,29 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package phonebook.application;
 
+import ezvcard.*;
+import ezvcard.parameter.*;
+import ezvcard.property.*;
+import ezvcard.property.StructuredName;
 import java.awt.HeadlessException;
-import java.awt.event.ItemEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
 
 /**
  *
  * @author bangadam
  */
 public class MainForm extends javax.swing.JFrame {
+
     DokterTableModel dokterTableModel;
 
     Integer nomorHalaman = 1;
@@ -33,6 +31,7 @@ public class MainForm extends javax.swing.JFrame {
     Integer totalHalaman = 1;
     Integer totalData = 0;
     String pathfile;
+    
     /**
      * Creates new form MainForm
      */
@@ -42,7 +41,7 @@ public class MainForm extends javax.swing.JFrame {
         buttonEnabledDisabled("awal");
         idTextField.setVisible(false);
         importButton.setEnabled(false);
-        initPagination();
+        initPagination(null);
     }
 
     /**
@@ -56,14 +55,14 @@ public class MainForm extends javax.swing.JFrame {
 
         jPanel1 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
+        menuDataTelpon = new javax.swing.JLabel();
+        tentangApp = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jSeparator1 = new javax.swing.JSeparator();
         jSeparator2 = new javax.swing.JSeparator();
         jSeparator3 = new javax.swing.JSeparator();
-        jLabel6 = new javax.swing.JLabel();
+        keluarButton = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         jSeparator4 = new javax.swing.JSeparator();
@@ -80,17 +79,20 @@ public class MainForm extends javax.swing.JFrame {
         jLabelStatusHalaman = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
         namaTextField = new javax.swing.JTextField();
-        no_1TextField = new javax.swing.JTextField();
+        cariTextField = new javax.swing.JTextField();
         jLabel9 = new javax.swing.JLabel();
         no_2TextField = new javax.swing.JTextField();
         jLabel10 = new javax.swing.JLabel();
         jLabel11 = new javax.swing.JLabel();
-        alamattextField = new javax.swing.JTextField();
+        emailtextField = new javax.swing.JTextField();
         idTextField = new javax.swing.JTextField();
         importButton = new javax.swing.JButton();
         jSeparator5 = new javax.swing.JSeparator();
         jLabel12 = new javax.swing.JLabel();
         pilihFileButton = new javax.swing.JButton();
+        exportButton = new javax.swing.JButton();
+        no_1TextField1 = new javax.swing.JTextField();
+        cariButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -100,9 +102,19 @@ public class MainForm extends javax.swing.JFrame {
         jPanel2.setBackground(new java.awt.Color(0, 175, 254));
         jPanel2.setForeground(new java.awt.Color(0, 0, 9));
 
-        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/phone-book.png"))); // NOI18N
+        menuDataTelpon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/phone-book.png"))); // NOI18N
+        menuDataTelpon.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                menuDataTelponMouseClicked(evt);
+            }
+        });
 
-        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/information.png"))); // NOI18N
+        tentangApp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/information.png"))); // NOI18N
+        tentangApp.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tentangAppMouseClicked(evt);
+            }
+        });
 
         jLabel3.setForeground(new java.awt.Color(255, 255, 255));
         jLabel3.setText("Tentang App");
@@ -110,7 +122,12 @@ public class MainForm extends javax.swing.JFrame {
         jLabel4.setForeground(new java.awt.Color(255, 255, 255));
         jLabel4.setText("Data Telepon");
 
-        jLabel6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/sign-out-option.png"))); // NOI18N
+        keluarButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/sign-out-option.png"))); // NOI18N
+        keluarButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                keluarButtonMouseClicked(evt);
+            }
+        });
 
         jLabel7.setForeground(new java.awt.Color(255, 255, 255));
         jLabel7.setText("Keluar");
@@ -129,10 +146,10 @@ public class MainForm extends javax.swing.JFrame {
                         .addComponent(jLabel4))
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGap(44, 44, 44)
-                        .addComponent(jLabel1))
+                        .addComponent(menuDataTelpon))
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGap(41, 41, 41)
-                        .addComponent(jLabel2))
+                        .addComponent(tentangApp))
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addContainerGap()
                         .addComponent(jLabel3))
@@ -140,20 +157,20 @@ public class MainForm extends javax.swing.JFrame {
                         .addGap(38, 38, 38)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel7)
-                            .addComponent(jLabel6))))
+                            .addComponent(keluarButton))))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(25, 25, 25)
-                .addComponent(jLabel1)
+                .addComponent(menuDataTelpon)
                 .addGap(18, 18, 18)
                 .addComponent(jLabel4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(12, 12, 12)
-                .addComponent(jLabel2)
+                .addComponent(tentangApp)
                 .addGap(18, 18, 18)
                 .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 15, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -161,14 +178,14 @@ public class MainForm extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel6)
+                .addComponent(keluarButton)
                 .addGap(12, 12, 12)
                 .addComponent(jLabel7)
                 .addGap(15, 15, 15))
         );
 
         jLabel5.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
-        jLabel5.setText("Data Telpon Dokter");
+        jLabel5.setText("Indonesia Journal of Obstetrics and Gynecology");
 
         jTableDokter.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -196,6 +213,8 @@ public class MainForm extends javax.swing.JFrame {
         });
         jScrollPane1.setViewportView(jTableDokter);
 
+        simpanButton.setBackground(new java.awt.Color(2, 117, 216));
+        simpanButton.setForeground(new java.awt.Color(255, 255, 255));
         simpanButton.setText("Simpan");
         simpanButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -203,6 +222,8 @@ public class MainForm extends javax.swing.JFrame {
             }
         });
 
+        editButton.setBackground(new java.awt.Color(240, 173, 78));
+        editButton.setForeground(new java.awt.Color(255, 255, 255));
         editButton.setText("Update");
         editButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -210,6 +231,8 @@ public class MainForm extends javax.swing.JFrame {
             }
         });
 
+        hapusButton.setBackground(new java.awt.Color(217, 83, 79));
+        hapusButton.setForeground(new java.awt.Color(255, 255, 255));
         hapusButton.setText("Hapus");
         hapusButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -255,10 +278,12 @@ public class MainForm extends javax.swing.JFrame {
 
         jLabel10.setText("No. Telpon 2");
 
-        jLabel11.setText("Alamat");
+        jLabel11.setText("Email");
 
         idTextField.setText("jTextField1");
 
+        importButton.setBackground(new java.awt.Color(179, 205, 224));
+        importButton.setForeground(new java.awt.Color(255, 255, 255));
         importButton.setText("Import from CSV");
         importButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -270,10 +295,30 @@ public class MainForm extends javax.swing.JFrame {
 
         jLabel12.setText("Import Kontak Dokter dari File ?");
 
+        pilihFileButton.setBackground(new java.awt.Color(153, 153, 153));
+        pilihFileButton.setForeground(new java.awt.Color(255, 255, 255));
         pilihFileButton.setText("Pilih FIle");
         pilihFileButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 pilihFileButtonActionPerformed(evt);
+            }
+        });
+
+        exportButton.setBackground(new java.awt.Color(150, 206, 180));
+        exportButton.setForeground(new java.awt.Color(255, 255, 255));
+        exportButton.setText("Export All to Contact VCF");
+        exportButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exportButtonActionPerformed(evt);
+            }
+        });
+
+        cariButton.setBackground(new java.awt.Color(92, 184, 92));
+        cariButton.setForeground(new java.awt.Color(255, 255, 255));
+        cariButton.setText("Cari");
+        cariButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cariButtonActionPerformed(evt);
             }
         });
 
@@ -287,48 +332,7 @@ public class MainForm extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jSeparator4)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jLabel5)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(idTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(29, 29, 29)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                                        .addComponent(simpanButton)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(editButton)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(hapusButton))
-                                    .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                                                .addComponent(jLabel8)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                .addComponent(namaTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 227, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                                .addComponent(jLabel9)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(no_1TextField, javax.swing.GroupLayout.PREFERRED_SIZE, 227, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(jLabel10)
-                                            .addComponent(jLabel11))
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(no_2TextField, javax.swing.GroupLayout.PREFERRED_SIZE, 227, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                            .addComponent(alamattextField, javax.swing.GroupLayout.PREFERRED_SIZE, 227, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                                .addGap(18, 18, 18)
-                                .addComponent(jSeparator5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(jLabel12))
-                                    .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addGap(74, 74, 74)
-                                        .addComponent(pilihFileButton))
-                                    .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addGap(49, 49, 49)
-                                        .addComponent(importButton))))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(jLabelStatusHalaman)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -339,10 +343,58 @@ public class MainForm extends javax.swing.JFrame {
                                 .addComponent(jButtonNext)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jButtonLast)
-                                .addGap(314, 314, 314)
+                                .addGap(312, 312, 312)
                                 .addComponent(jLabelTotalData))
-                            .addComponent(jScrollPane1))
-                        .addContainerGap(21, Short.MAX_VALUE))))
+                            .addComponent(jScrollPane1)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel5)
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(idTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(21, 21, 21)
+                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                                        .addComponent(jLabel8)
+                                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addComponent(namaTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 227, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                                        .addComponent(jLabel9)
+                                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                        .addComponent(no_1TextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 227, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                    .addComponent(jLabel10)
+                                                    .addComponent(jLabel11)))
+                                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                                .addComponent(simpanButton)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addComponent(editButton)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addComponent(hapusButton)))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(exportButton)
+                                            .addComponent(no_2TextField, javax.swing.GroupLayout.PREFERRED_SIZE, 227, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(emailtextField, javax.swing.GroupLayout.PREFERRED_SIZE, 227, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGap(26, 26, 26)
+                                        .addComponent(jSeparator5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(jLabel12)
+                                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                                .addGap(74, 74, 74)
+                                                .addComponent(pilihFileButton))
+                                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                                .addGap(49, 49, 49)
+                                                .addComponent(importButton))))
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(cariTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 227, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(cariButton)))
+                                .addGap(0, 0, Short.MAX_VALUE)))
+                        .addContainerGap())))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -351,33 +403,31 @@ public class MainForm extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGap(63, 63, 63)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel8)
                             .addComponent(namaTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel11)
-                            .addComponent(alamattextField, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(emailtextField, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(18, 18, 18)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel9)
-                            .addComponent(no_1TextField, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel10)
-                            .addComponent(no_2TextField, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(4, 4, 4)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(idTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(simpanButton)
-                                .addComponent(editButton)
-                                .addComponent(hapusButton))))
+                            .addComponent(no_2TextField, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(no_1TextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(simpanButton)
+                            .addComponent(editButton)
+                            .addComponent(hapusButton)
+                            .addComponent(exportButton))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 11, Short.MAX_VALUE)
+                        .addComponent(idTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jSeparator5))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGap(23, 23, 23)
                                 .addComponent(jLabel12)
@@ -385,20 +435,26 @@ public class MainForm extends javax.swing.JFrame {
                                 .addComponent(pilihFileButton)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(importButton)
-                                .addGap(0, 12, Short.MAX_VALUE)))
-                        .addGap(6, 6, 6)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 267, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jSeparator5)))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cariTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cariButton))
+                .addGap(7, 7, 7)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 267, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabelStatusHalaman)
                     .addComponent(jLabelTotalData)
+                    .addComponent(jButtonLast)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jButtonFirst)
                         .addComponent(jButtonPrevious)
-                        .addComponent(jButtonNext)
-                        .addComponent(jButtonLast)))
-                .addGap(20, 20, 20))
+                        .addComponent(jButtonNext))
+                    .addComponent(jLabelStatusHalaman))
+                .addGap(30, 30, 30))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -409,7 +465,7 @@ public class MainForm extends javax.swing.JFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         pack();
@@ -417,14 +473,14 @@ public class MainForm extends javax.swing.JFrame {
 
     private void simpanButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_simpanButtonActionPerformed
         try {
-            String sql = "insert into dokter (nama, alamat, no_hp_1, no_hp_2) values('"+namaTextField.getText()+"','"+alamattextField.getText()+"','"+no_1TextField.getText()+"','"+no_2TextField.getText()+"')";
-            java.sql.Connection conn = (java.sql.Connection)Koneksi.koneksiDB();
+            String sql = "insert into dokter (nama, email, no_hp_1, no_hp_2) values('" + namaTextField.getText() + "','" + emailtextField.getText() + "','" + cariTextField.getText() + "','" + no_2TextField.getText() + "')";
+            java.sql.Connection conn = (java.sql.Connection) Koneksi.koneksiDB();
             java.sql.PreparedStatement pst = conn.prepareStatement(sql);
             pst.execute();
             JOptionPane.showMessageDialog(null, "berhasil disimpan");
             MainForm form = new MainForm();
             buttonEnabledDisabled("awal");
-            initPagination();
+            initPagination(null);
         } catch (SQLException | HeadlessException e) {
             JOptionPane.showMessageDialog(null, e);
         }
@@ -432,26 +488,26 @@ public class MainForm extends javax.swing.JFrame {
 
     private void jButtonFirstActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonFirstActionPerformed
         nomorHalaman = 1;
-        initPagination();
+        initPagination(null);
     }//GEN-LAST:event_jButtonFirstActionPerformed
 
     private void jButtonPreviousActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPreviousActionPerformed
         if (nomorHalaman > 1) {
             nomorHalaman--;
-            initPagination();
+            initPagination(null);
         }
     }//GEN-LAST:event_jButtonPreviousActionPerformed
 
     private void jButtonNextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonNextActionPerformed
-       if (nomorHalaman < totalHalaman) {
+        if (nomorHalaman < totalHalaman) {
             nomorHalaman++;
-            initPagination();
+            initPagination(null);
         }
     }//GEN-LAST:event_jButtonNextActionPerformed
 
     private void jButtonLastActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonLastActionPerformed
         nomorHalaman = totalHalaman;
-        initPagination();
+        initPagination(null);
     }//GEN-LAST:event_jButtonLastActionPerformed
 
     private void jTableDokterMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTableDokterMouseClicked
@@ -459,35 +515,35 @@ public class MainForm extends javax.swing.JFrame {
         int row = jTableDokter.getSelectedRow();
         String id = jTableDokter.getModel().getValueAt(row, 0).toString();
         String nama = jTableDokter.getValueAt(row, 0).toString();
-        String alamat = jTableDokter.getValueAt(row, 1).toString();
+        String email = jTableDokter.getValueAt(row, 1).toString();
         String no_hp_1 = jTableDokter.getValueAt(row, 2).toString();
         String no_hp_2 = jTableDokter.getValueAt(row, 3).toString();
-        
+
         idTextField.setText(id);
         namaTextField.setText(nama);
-        alamattextField.setText(alamat);
-        no_1TextField.setText(no_hp_1);
+        emailtextField.setText(email);
+        no_1TextField1.setText(no_hp_1);
         no_2TextField.setText(no_hp_2);
     }//GEN-LAST:event_jTableDokterMouseClicked
 
     private void editButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editButtonActionPerformed
         String id = idTextField.getText();
         String nama = namaTextField.getText();
-        String alamat = alamattextField.getText();
-        String no_hp_1 = no_1TextField.getText();
+        String email = emailtextField.getText();
+        String no_hp_1 = no_1TextField1.getText();
         String no_hp_2 = no_2TextField.getText();
         try {
             String sql = "UPDATE dokter SET "
-                    + "nama= '"+nama+"',"
-                    + "alamat= '"+alamat+"',"
-                    + "no_hp_1= '"+no_hp_1+"',"
-                    + "no_hp_2= '"+no_hp_2+"'"
-                    + " WHERE id='"+id+"'";
+                    + "nama= '" + nama + "',"
+                    + "email= '" + email + "',"
+                    + "no_hp_1= '" + no_hp_1 + "',"
+                    + "no_hp_2= '" + no_hp_2 + "'"
+                    + " WHERE id='" + id + "'";
             Connection conn = (Connection) Koneksi.koneksiDB();
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.execute();
             JOptionPane.showMessageDialog(null, "Data Berhasil di Update");
-            initPagination();
+            initPagination(null);
             buttonEnabledDisabled("edit");
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, e);
@@ -495,31 +551,33 @@ public class MainForm extends javax.swing.JFrame {
     }//GEN-LAST:event_editButtonActionPerformed
 
     private void hapusButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hapusButtonActionPerformed
-       String id = idTextField.getText();
-       int dialogButton = JOptionPane.YES_NO_OPTION;
-       int dialogResult = JOptionPane.showConfirmDialog (null, "Apakah anda ingin menghapus data ini ?","Warning",dialogButton);
-       if(dialogResult == JOptionPane.YES_OPTION){
-           try {
-               String sql = "DELETE FROM dokter WHERE id='"+id+"'";
-               Connection conn = (Connection) Koneksi.koneksiDB();
-               PreparedStatement stmt = conn.prepareStatement(sql);
-               stmt.execute();
-               JOptionPane.showMessageDialog(null, "Data Berhasil di hapus");
-               buttonEnabledDisabled("edit");
-               initPagination();
-           } catch (Exception e) {
-              JOptionPane.showMessageDialog(null, e);
-           }
-       }
+        String id = idTextField.getText();
+        int dialogButton = JOptionPane.YES_NO_OPTION;
+        int dialogResult = JOptionPane.showConfirmDialog(null, "Apakah anda ingin menghapus data ini ?", "Warning", dialogButton);
+        if (dialogResult == JOptionPane.YES_OPTION) {
+            try {
+                String sql = "DELETE FROM dokter WHERE id='" + id + "'";
+                Connection conn = (Connection) Koneksi.koneksiDB();
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                stmt.execute();
+                JOptionPane.showMessageDialog(null, "Data Berhasil di hapus");
+                buttonEnabledDisabled("edit");
+                initPagination(null);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, e);
+            }
+        }
     }//GEN-LAST:event_hapusButtonActionPerformed
 
     private void importButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importButtonActionPerformed
         try {
+            Loader loader = new Loader();
+            loader.setVisible(true);
             BufferedReader br = new BufferedReader(new FileReader(pathfile));
             String line;
             while ((line = br.readLine()) != null) {
                 String[] value = line.split(",");
-                String sql = "INSERT INTO dokter (nama,alamat,no_hp_1,no_hp_2) VALUES(?,?,?,?)";
+                String sql = "INSERT INTO dokter (nama,email,no_hp_1,no_hp_2) VALUES(?,?,?,?)";
                 Connection conn = (Connection) Koneksi.koneksiDB();
                 PreparedStatement stmt = conn.prepareStatement(sql);
                 stmt.setString(1, value[0]);
@@ -529,9 +587,10 @@ public class MainForm extends javax.swing.JFrame {
                 stmt.executeUpdate();
                 stmt.close();
             }
+            loader.setVisible(false);
             br.close();
             JOptionPane.showMessageDialog(null, "Import data berhasil !");
-            initPagination();
+            initPagination(null);
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, e);
         } catch (SQLException ex) {
@@ -547,7 +606,95 @@ public class MainForm extends javax.swing.JFrame {
         importButton.setEnabled(true);
     }//GEN-LAST:event_pilihFileButtonActionPerformed
 
-    public void initPagination() {
+    private void tentangAppMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tentangAppMouseClicked
+        JOptionPane.showMessageDialog(null, "Aplikasi Contact");
+    }//GEN-LAST:event_tentangAppMouseClicked
+
+    private void menuDataTelponMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_menuDataTelponMouseClicked
+        new MainForm().setVisible(true);
+    }//GEN-LAST:event_menuDataTelponMouseClicked
+
+    private void keluarButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_keluarButtonMouseClicked
+        System.exit(0);
+    }//GEN-LAST:event_keluarButtonMouseClicked
+
+    private void exportButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportButtonActionPerformed
+        try {
+            Loader loader = new Loader();
+            loader.setVisible(true);
+            JFileChooser chooser = new JFileChooser();
+            chooser.setCurrentDirectory(new java.io.File("."));
+            chooser.setDialogTitle("Pilih folder untuk menyimpan file contact");
+            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            chooser.setAcceptAllFileFilterUsed(false);
+            if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                Connection conn = Koneksi.koneksiDB();
+                String sql = "SELECT * FROM dokter";
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                ResultSet result = stmt.executeQuery();
+                while (result.next()) {
+                    String nama = result.getString("nama");
+                    String email = result.getString("email");
+                    String no_hp_1 = result.getString("no_hp_1");
+                    String no_hp_2 = result.getString("no_hp_2");
+                    
+                    VCard vcard = createVCard(nama, email, no_hp_1, no_hp_2);
+                    //write vCard
+    //                String path = Paths.get(".").toAbsolutePath().normalize().toString();
+                    File file = new File(chooser.getSelectedFile()+"/"+nama+".vcf");
+//                    System.out.println("Writing " + file.getName() + "...");
+                    
+                    Ezvcard.write(vcard).version(VCardVersion.V3_0).go(file);
+                }
+                loader.setVisible(false);
+                JOptionPane.showMessageDialog(null, "Export data ke Contact sudah selesai");
+            } else {
+                loader.setVisible(false);
+                System.out.println("No Selection ");
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }//GEN-LAST:event_exportButtonActionPerformed
+
+    private void cariButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cariButtonActionPerformed
+        String namaOrNomor = cariTextField.getText();
+        initPagination(namaOrNomor);
+    }//GEN-LAST:event_cariButtonActionPerformed
+
+    private static VCard createVCard(String nama, String email, String no_hp_1, String no_hp_2) throws IOException {
+        VCard vcard = new VCard();
+
+        vcard.setKind(Kind.individual());
+
+        vcard.setGender(Gender.male());
+
+        vcard.addLanguage("en-US");
+
+        StructuredName n = new StructuredName();
+        n.setFamily(nama);
+        vcard.setStructuredName(n);
+
+        vcard.setFormattedName(nama);
+        vcard.addEmail(email, EmailType.HOME);
+
+        vcard.addTelephoneNumber(no_hp_1, TelephoneType.WORK, TelephoneType.CELL);
+        if (no_hp_2 != null) {
+           vcard.addTelephoneNumber(no_hp_2, TelephoneType.WORK, TelephoneType.CELL);
+        }
+        
+        vcard.setUid(Uid.random());
+
+        vcard.setRevision(Revision.now());
+
+        return vcard;
+    }
+    
+
+    public void initPagination(String namaOrNomor) {
         totalData = App.getDokterService().count();
         jumlahBarisPerhalaman = 20;
         Double totalHalamanD = Math.ceil(totalData.doubleValue() / jumlahBarisPerhalaman.doubleValue());
@@ -574,25 +721,25 @@ public class MainForm extends javax.swing.JFrame {
         }
 
         dokterTableModel = new DokterTableModel();
-        dokterTableModel.setList(App.getDokterService().getAll(nomorHalaman, jumlahBarisPerhalaman));
+        dokterTableModel.setList(App.getDokterService().getAll(nomorHalaman, jumlahBarisPerhalaman, namaOrNomor));
         jTableDokter.setModel(dokterTableModel);
-        
+
         jTableDokter.removeColumn(jTableDokter.getColumnModel().getColumn(0));
-        
+
         jLabelStatusHalaman.setText("Halaman " + nomorHalaman + " dari " + totalHalaman);
         jLabelTotalData.setText(("Total data " + totalData));
     }
-    
+
     public void buttonEnabledDisabled(String choice) {
-        switch(choice) {
+        switch (choice) {
             case "awal":
                 editButton.setEnabled(false);
                 hapusButton.setEnabled(false);
                 break;
-             case "edit":
+            case "edit":
                 namaTextField.setText("");
-                alamattextField.setText("");
-                no_1TextField.setText("");
+                emailtextField.setText("");
+                no_1TextField1.setText("");
                 no_2TextField.setText("");
                 editButton.setEnabled(false);
                 simpanButton.setEnabled(true);
@@ -605,6 +752,7 @@ public class MainForm extends javax.swing.JFrame {
                 break;
         }
     }
+    
     /**
      * @param args the command line arguments
      */
@@ -641,8 +789,11 @@ public class MainForm extends javax.swing.JFrame {
 //    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JTextField alamattextField;
+    private javax.swing.JButton cariButton;
+    private javax.swing.JTextField cariTextField;
     private javax.swing.JButton editButton;
+    private javax.swing.JTextField emailtextField;
+    private javax.swing.JButton exportButton;
     private javax.swing.JButton hapusButton;
     private javax.swing.JTextField idTextField;
     private javax.swing.JButton importButton;
@@ -650,15 +801,12 @@ public class MainForm extends javax.swing.JFrame {
     private javax.swing.JButton jButtonLast;
     private javax.swing.JButton jButtonNext;
     private javax.swing.JButton jButtonPrevious;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
@@ -673,10 +821,13 @@ public class MainForm extends javax.swing.JFrame {
     private javax.swing.JSeparator jSeparator4;
     private javax.swing.JSeparator jSeparator5;
     private javax.swing.JTable jTableDokter;
+    private javax.swing.JLabel keluarButton;
+    private javax.swing.JLabel menuDataTelpon;
     private javax.swing.JTextField namaTextField;
-    private javax.swing.JTextField no_1TextField;
+    private javax.swing.JTextField no_1TextField1;
     private javax.swing.JTextField no_2TextField;
     private javax.swing.JButton pilihFileButton;
     private javax.swing.JButton simpanButton;
+    private javax.swing.JLabel tentangApp;
     // End of variables declaration//GEN-END:variables
 }

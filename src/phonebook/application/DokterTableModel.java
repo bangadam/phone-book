@@ -15,7 +15,7 @@ import javax.swing.table.AbstractTableModel;
 public class DokterTableModel extends AbstractTableModel{
     
     List<Dokter> listDokter=new ArrayList<Dokter>();
-    private final String HEADER[]={"Id","Nama","Alamat","No. Telepon 1","No. Telepon 2"};
+    private final String HEADER[]={"Id","Nama","Email","No. Telepon 1","No. Telepon 2"};
     
     public void setList(List<Dokter> listDokter){
         this.listDokter=listDokter;
@@ -44,7 +44,7 @@ public class DokterTableModel extends AbstractTableModel{
             return Dokter.getNama();
             
             case 2:
-            return Dokter.getAlamat();
+            return Dokter.getEmail();
                 
             case 3:
             return Dokter.getNo_hp_1();

@@ -26,12 +26,17 @@ public class DokterServices {
         this.dataSource = dataSource;
     }
    
-    public List<Dokter> getAll(int halaman, int banyakBaris) {
+    public List<Dokter> getAll(int halaman, int banyakBaris, String namaOrNomor) {
         List<Dokter> listDokter = new ArrayList<Dokter>();
+        String sql = "SELECT * FROM dokter limit ?,?";
         try {
             connection = dataSource.getConnection();
             connection.setAutoCommit(false);
-            preparedStatement = connection.prepareStatement("SELECT * FROM dokter limit ?,?");
+            
+            if (namaOrNomor != null) {
+                sql = "SELECT * FROM dokter WHERE (nama like '%"+namaOrNomor+"%' or no_hp_1 like '%"+namaOrNomor+"%' or no_hp_2 like '%"+namaOrNomor+"%') limit ?,?";
+            }
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, banyakBaris*(halaman-1));
             preparedStatement.setInt(2, banyakBaris);
             ResultSet res = preparedStatement.executeQuery();
@@ -40,7 +45,7 @@ public class DokterServices {
                 Dokter dk = new Dokter();
                 dk.setId(res.getLong("id"));
                 dk.setNama(res.getString("nama"));
-                dk.setAlamat(res.getString("alamat"));
+                dk.setEmail(res.getString("email"));
                 dk.setNo_hp_1(res.getString("no_hp_1"));
                 dk.setNo_hp_2(res.getString("no_hp_2"));
                 listDokter.add(dk);
